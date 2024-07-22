@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot Demo</title>
+    <style>
+        /* General styling for body and html to ensure full width and height usage */
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow-x: hidden;
+            background-color: #f0f0f0;
+        }
+
+        /* Outer container to center the content and set width */
+        #outer-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            padding: 0;
+        }
+
+        /* Title styling to set font size and spacing */
+        #title {
+            font-size: 90px;
+            margin-bottom: 20px;
+            padding-top: 100px; /* Add extra padding above the title */
+            text-align: center;
+            width: 100%;
+        }
+
+        /* Input container styling for padding, margin, background, and borders */
+        #input-container {
+            padding: 20px;
+            margin-bottom: 150px;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: calc(100% - 40px); /* Adjust width to avoid edge issues */
+            max-width: 1000px; /* Limit the max width */
+        }
+
+        /* Input field styling */
+        #input-container input[type="text"] {
+            width: 300px;
+            padding: 10px;
+            margin-right: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        /* Button styling */
+        #input-container button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        /* Button hover effect */
+        #input-container button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Iframe container styling to take up full viewport height minus header */
+        #iframe-container {
+            position: relative;
+            width: 100%;
+            height: calc(100vh - 60px); /* Adjust height to fit modal */
+        }
+
+        /* Iframe styling to take full width and height */
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+
+        /* Modal styling for visibility and positioning */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        /* Modal content styling for background and dimensions */
+        .modal-content {
+            background-color: #fefefe;
+            margin: 0; /* Remove margins to make it full width */
+            padding: 0; /* Remove padding */
+            border: none; /* Remove border */
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            box-sizing: border-box; /* Include padding and border in width and height */
+        }
+
+        /* Close button styling */
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            margin: 10px; /* Add some margin for spacing */
+        }
+
+        /* Close button hover effect */
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        /* Modal header styling */
+        .modal-header {
+            background-color: #ffffff;
+            padding: 5px;
+            text-align: center;
+        }
+
+        /* Modal body styling for height adjustment */
+        .modal-body {
+            height: calc(100% - 40px); /* Adjust height to fit within modal */
+        }
+    </style>
+</head>
+<body>
+    <div id="outer-container">
+        <div id="title">TRY OUT OUR CHATBOT</div>
+        <div id="input-container">
+            <label for="websiteUrl">Enter Website URL: </label>
+            <input type="text" id="websiteUrl" placeholder="https://example.com">
+            <button id="openModalBtn">Open Chatbot</button>
+        </div>
+    </div>
+
+    <!-- Modal window structure -->
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="close">&times;</span>
+                <h2>DEMO</h2>
+            </div>
+            <div class="modal-body" id="iframe-container">
+                <iframe id="proxy-iframe" src="" frameborder="0"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Event listener for document ready
+        document.addEventListener("DOMContentLoaded", function() {
+            console.log("Document loaded");
+
+            // DOM element references
+            var iframe = document.getElementById('proxy-iframe');
+            var modal = document.getElementById('myModal');
+            var btn = document.getElementById('openModalBtn');
+            var span = document.getElementsByClassName('close')[0];
+            var urlInput = document.getElementById('websiteUrl');
+
+            // Function to open the modal with the specified URL
+            btn.onclick = function() {
+                var url = urlInput.value.trim();
+                if (url && isValidUrl(url)) {
+                    console.log("Opening modal with URL:", url);
+                    iframe.src = url;
+                    modal.style.display = "block";
+                } else {
+                    alert("Please enter a valid URL.");
+                }
+            }
+
+            // Function to close the modal
+            span.onclick = function() {
+                modal.style.display = "none";
+            }
+
+            // Close the modal when clicking outside of it
+            window.onclick = function(event) {
+                if (event.target == modal) {
+                    modal.style.display = "none";
+                }
+            }
+
+            // Function to handle iframe load event
+            iframe.onload = function() {
+                console.log("Iframe loaded:", iframe.src);
+                try {
+                    setTimeout(function() {
+                        // Inject the chatbot script into the iframe's parent document
+                        var chatbotScript = document.createElement('script');
+                        chatbotScript.src = "https://app.aminos.ai/js/chat_plugin_ghl.js";
+                        chatbotScript.setAttribute('data-bot-id', '19857');
+                        document.body.appendChild(chatbotScript);
+                        console.log("Chatbot script injected after delay");
+                    }, 1000); // Delay in milliseconds
+
+                } catch (error) {
+                    console.error("Error injecting script: ", error);
+                }
+            };
+
+            // Handle iframe load errors
+            iframe.onerror = function() {
+                console.error("Error loading iframe content.");
+            };
+
+            // Function to validate URL format
+            function isValidUrl(string) {
+                try {
+                    new URL(string);
+                    return true;
+                } catch (_) {
+                    return false;  
+                }
+            }
+        });
+    </script>
+</body>
+</html>
